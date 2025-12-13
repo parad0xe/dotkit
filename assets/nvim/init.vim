@@ -4,6 +4,7 @@ Plug 'nvim-tree/nvim-web-devicons'
 Plug 'nvim-tree/nvim-tree.lua'
 Plug 'catppuccin/nvim', { 'as': 'catppuccin' }
 Plug 'sainnhe/everforest'
+Plug 'AlexvZyl/nordic.nvim', { 'branch': 'main' }
 Plug 'nvim-lua/plenary.nvim'
 Plug 'nvim-telescope/telescope.nvim', { 'tag': '0.1.8' }
 
@@ -17,7 +18,9 @@ set shiftwidth=4
 set smartindent
 set autoindent
 
-colorscheme everforest
+" colorscheme catppuccin "catppuccin-frappe"
+colorscheme nordic
+" colorscheme everforest
 
 function! Header()
 	"==================  editing header file =====================

@@ -9,6 +9,7 @@ Plug 'nvim-lua/plenary.nvim'
 Plug 'nvim-telescope/telescope.nvim', { 'tag': '0.1.8' }
 Plug 'kdheepak/lazygit.nvim'
 Plug 'tpope/vim-surround'
+Plug 'kkoomen/vim-doge', { 'do': { -> doge#install() } }
 
 call plug#end()
 
@@ -56,3 +57,5 @@ source ~/.config/nvim/config.lua
 
 let g:user42 = 'nlallema'
 let g:mail42 = 'nlallema@student.42lyon.fr'
+
+let g:doge_doc_standard_python = 'google'

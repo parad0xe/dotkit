@@ -62,4 +62,5 @@ vim.keymap.set('n', ' fg', builtin.live_grep, { desc = 'Telescope live grep' })
 vim.keymap.set('n', ' fb', builtin.buffers, { desc = 'Telescope buffers' })
 vim.keymap.set('n', ' fh', builtin.help_tags, { desc = 'Telescope help tags' })
 
+vim.keymap.set('n', 'x', '<Plug>(doge-generate)')
 

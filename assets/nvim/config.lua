@@ -64,13 +64,18 @@ vim.keymap.set('n', ' fh', builtin.help_tags, { desc = 'Telescope help tags' })
 
 vim.keymap.set('n', ' x', '<Plug>(doge-generate)')
 
-require('lint').linters_by_ft = {
+local ok, lint = pcall(require, "lint")
+lint.linters_by_ft = {
   python = {'flake8'},
 }
 
-vim.api.nvim_create_autocmd({ "BufWritePost", "InsertLeave" }, {
+vim.api.nvim_create_autocmd({ "BufWritePost", "InsertLeave", "BufReadPost", "BufNewFile" }, {
   callback = function()
-    require("lint").try_lint()
+    -- ne lancer lint que si le fichier a un linter configuré
+    local ft = vim.bo.filetype
+    if lint.linters_by_ft[ft] then
+      lint.try_lint()
+    end
   end,
 })
 

@@ -63,3 +63,31 @@ vim.keymap.set('n', ' fb', builtin.buffers, { desc = 'Telescope buffers' })
 vim.keymap.set('n', ' fh', builtin.help_tags, { desc = 'Telescope help tags' })
 
 vim.keymap.set('n', ' x', '<Plug>(doge-generate)')
+
+require('lint').linters_by_ft = {
+  python = {'flake8'},
+}
+
+vim.api.nvim_create_autocmd({ "BufWritePost", "InsertLeave" }, {
+  callback = function()
+    require("lint").try_lint()
+  end,
+})
+
+vim.diagnostic.config({
+  virtual_text = {
+    prefix = "▎"--, "✖"
+  },
+  signs = true,
+  underline = false,
+  update_in_insert = false,
+  severity_sort = true,
+})
+
+vim.api.nvim_set_hl(0, "DiagnosticError", { fg = "#ff5555" })
+vim.api.nvim_set_hl(0, "DiagnosticWarn",  { fg = "#ff5555" })
+-- vim.api.nvim_set_hl(0, "DiagnosticWarn",  { fg = "#f1fa8c" })
+
+vim.api.nvim_set_hl(0, "DiagnosticVirtualTextError", { fg = "#ff6c6b" })
+vim.api.nvim_set_hl(0, "DiagnosticVirtualTextWarn",  { fg = "#ff6c6b" })
+--vim.api.nvim_set_hl(0, "DiagnosticVirtualTextWarn",  { fg = "#ECBE7B" })

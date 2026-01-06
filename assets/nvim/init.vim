@@ -10,6 +10,7 @@ Plug 'nvim-telescope/telescope.nvim', { 'tag': '0.1.8' }
 Plug 'kdheepak/lazygit.nvim'
 Plug 'tpope/vim-surround'
 Plug 'kkoomen/vim-doge', { 'do': { -> doge#install() } }
+Plug 'mfussenegger/nvim-lint'
 
 call plug#end()
 

@@ -67,7 +67,19 @@ vim.keymap.set('n', ' x', '<Plug>(doge-generate)')
 local ok, lint = pcall(require, "lint")
 if ok then
 	if vim.fn.executable("flake8") == 1 then
-		lint.linters_by_ft.python = { "flake8" }
+	  lint.linters_by_ft.python = lint.linters_by_ft.python or {}
+	  table.insert(lint.linters_by_ft.python, "flake8")
+	end
+
+	if vim.fn.executable("mypy") == 1 then
+	  lint.linters_by_ft.python = lint.linters_by_ft.python or {}
+	  table.insert(lint.linters_by_ft.python, "mypy")
+
+	  local mypy = lint.linters.mypy
+	  mypy.args = vim.list_extend(
+		  mypy.args or {},
+		  { "--cache-dir=/dev/null" }
+	  )
 	end
 
 	vim.api.nvim_create_autocmd({ "BufWritePost", "InsertLeave", "BufReadPost", "BufNewFile" }, {

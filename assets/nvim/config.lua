@@ -65,6 +65,8 @@ vim.keymap.set('n', ' fh', builtin.help_tags, { desc = 'Telescope help tags' })
 vim.keymap.set('n', ' x', '<Plug>(doge-generate)')
 vim.api.nvim_create_user_command('DogeAll', function()
   vim.cmd([[g/^\s*\(def\s\+\k\+\s*(\|class\s\+\k\+\)/DogeGenerate google]])
+  vim.cmd([[ %s/\("""\)\[TODO:summary\]\n\(\s*\)/\1\2/g ]])
+  vim.cmd([[ %s/\[TODO:description\]/\[TODO:brief_description\]/g ]])
 end, {})
 
 local ok, lint = pcall(require, "lint")

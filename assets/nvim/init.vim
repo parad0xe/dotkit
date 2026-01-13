@@ -26,6 +26,10 @@ set shiftwidth=4
 set smartindent
 set autoindent
 
+set undofile
+set undodir=~/.local/share/nvim/undo/
+set undolevels=100
+
 " colorscheme nordic
 colorscheme tokyonight-moon
 " colorscheme everforest

@@ -9,14 +9,32 @@ require("toggleterm").setup({
 		return height
     end,
     direction = "horizontal",
-	persist_size = false,
-	persist_mode = false,
+	persist_size = true,
+	persist_mode = true,
     hide_numbers = true,
     shade_filetypes = {},
     shade_terminals = false,
     start_in_insert = true,
     close_on_exit = true,
 })
+
+local Terminal  = require("toggleterm.terminal").Terminal
+
+local term1 = Terminal:new({cmd = "fish", hidden = true, direction = "horizontal"})
+local term2 = Terminal:new({cmd = "fish", hidden = true, direction = "horizontal"})
+local term3 = Terminal:new({cmd = "fish", hidden = true, direction = "horizontal"})
+
+function _TERM1_TOGGLE() term1:toggle() end
+function _TERM2_TOGGLE() term2:toggle() end
+function _TERM3_TOGGLE() term3:toggle() end
+
+keymap("n", "<C-1>", ":lua _TERM1_TOGGLE()<CR>", opts)
+keymap("n", "<C-2>", ":lua _TERM2_TOGGLE()<CR>", opts)
+keymap("n", "<C-3>", ":lua _TERM3_TOGGLE()<CR>", opts)
+
+keymap("t", "<C-1>", "<C-\\><C-n>:lua _TERM1_TOGGLE()<CR>", opts)
+keymap("t", "<C-2>", "<C-\\><C-n>:lua _TERM2_TOGGLE()<CR>", opts)
+keymap("t", "<C-3>", "<C-\\><C-n>:lua _TERM3_TOGGLE()<CR>", opts)
 
 -- open terminal
 keymap("n", "<C-t>", ":ToggleTerm<CR>", opts)

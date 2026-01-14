@@ -15,6 +15,7 @@ Plug 'xiyaowong/transparent.nvim'
 Plug 'tamton-aquib/staline.nvim'
 Plug 'sphamba/smear-cursor.nvim'
 Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug']}
+Plug 'nxhung2304/lastplace.nvim'
 
 call plug#end()
 

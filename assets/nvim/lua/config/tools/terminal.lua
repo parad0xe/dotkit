@@ -24,7 +24,30 @@ if toggleterm_ok then
 	keymap("n", "<C-t>", ":ToggleTerm<CR>", { desc = "Open terminal" })
 
 	-- close terminal
-	keymap("t", "<C-t>", "<C-\\><C-n>:ToggleTerm<CR>", { desc = "Close terminal" })
+	keymap("t", "<C-t>", function()
+	  vim.cmd("stopinsert")
+	  vim.cmd("ToggleTerm")
+	  editor_focus()
+	end, { desc = "Close terminal" })
+
+	-- toggle focus
+	local function smart_terminal_focus()
+		if vim.bo.buftype == 'terminal' then
+			vim.cmd("wincmd p")
+		else
+			for _, win in ipairs(vim.api.nvim_list_wins()) do
+				local buf = vim.api.nvim_win_get_buf(win)
+				if vim.bo[buf].buftype == 'terminal' then
+					vim.api.nvim_set_current_win(win)
+					vim.cmd("startinsert")
+					return
+				end
+			end
+			vim.cmd("ToggleTerm")
+		end
+	end
+	keymap({'n', 't'}, '<C-LEFT>', smart_terminal_focus, { desc = "Toggle Focus Terminal/Editor" })
+	keymap({'n', 't'}, '<C-RIGHT>', smart_terminal_focus, { desc = "Toggle Focus Terminal/Editor" })
 
 	-- switch mode: normal -> terminal
 	keymap("n", "<C-n>", "i", { desc = "Switch from normal to terminal mode" })

@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+# Description: Create default .gitignore if not exists
+
+GITIGNORE=".gitignore"
+
+if [ ! -f "$GITIGNORE" ]; then
+  cat <<'EOF' > "$GITIGNORE"
+.venv
+.gitignore
+*.toml
+*.lock
+*.swp
+__pycache__
+EOF
+  echo ".gitignore created."
+else
+  echo ".gitignore already exists. aborted."
+fi

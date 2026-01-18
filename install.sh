@@ -44,7 +44,20 @@ function install_bin
 	mkdir -p $HOME/.local/bin
 	for bin in $(ls $ASSETS/bin); do
 		echo -n "install $bin into $HOME/.local/bin.. "
-		cp $ASSETS/bin/$bin $HOME/.local/bin
+		ln -sf $ASSETS/bin/$bin $HOME/.local/bin
+		echo "OK"
+	done
+	echo "done"
+}
+
+function install_scripts
+{
+	echo ""
+	echo "== Install scripts =="
+	mkdir -p $HOME/.local/bin
+	for bin in $(ls $ASSETS/scripts); do
+		echo -n "install $bin into $HOME/.local/bin.. "
+		ln -sf $ASSETS/scripts/$bin $HOME/.local/bin
 		echo "OK"
 	done
 	echo "done"
@@ -73,6 +86,7 @@ function configure_fish
 install_vim_plug
 install_nerd_font
 install_bin
+install_scripts
 configure_nvim
 configure_fish
 

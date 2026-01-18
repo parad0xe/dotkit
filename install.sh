@@ -44,7 +44,7 @@ function install_bin
 	mkdir -p $HOME/.local/bin
 	for bin in $(ls $ASSETS/bin); do
 		echo -n "install $bin into $HOME/.local/bin.. "
-		ln -sf $ASSETS/bin/$bin $HOME/.local/bin
+		ln -Tsf $ASSETS/bin/$bin $HOME/.local/bin
 		echo "OK"
 	done
 	echo "done"
@@ -57,7 +57,7 @@ function install_scripts
 	mkdir -p $HOME/.local/bin
 	for bin in $(ls $ASSETS/scripts); do
 		echo -n "install $bin into $HOME/.local/bin.. "
-		ln -sf $ASSETS/scripts/$bin $HOME/.local/bin
+		ln -Tsf $ASSETS/scripts/$bin $HOME/.local/bin
 		echo "OK"
 	done
 	echo "done"
@@ -68,9 +68,9 @@ function configure_nvim
 	echo ""
 	echo "== Install nvim configuration =="
 	mkdir -p $HOME/.config/nvim/lua
-	ln -sf $ASSETS/nvim/config.lua $HOME/.config/nvim/config.lua
-	ln -sf $ASSETS/nvim/init.vim $HOME/.config/nvim/init.vim 
-	ln -sf $ASSETS/nvim/lua/config $HOME/.config/nvim/lua/config 
+	ln -Tsf $ASSETS/nvim/config.lua $HOME/.config/nvim/config.lua
+	ln -Tsf $ASSETS/nvim/init.vim $HOME/.config/nvim/init.vim 
+	ln -Tsf $ASSETS/nvim/lua/config $HOME/.config/nvim/lua/config 
 	echo "done"
 }
 
@@ -79,7 +79,7 @@ function configure_fish
 	echo ""
 	echo "== Install fish configuration =="
 	mkdir -p $HOME/.config/fish
-	ln -sf $ASSETS/fish/config.fish $HOME/.config/fish/config.fish
+	ln -Tsf $ASSETS/fish/config.fish $HOME/.config/fish/config.fish
 	echo "done"
 }
 

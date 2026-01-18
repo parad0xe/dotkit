@@ -12,10 +12,18 @@ Plug 'kkoomen/vim-doge', { 'do': { -> doge#install() } }
 Plug 'mfussenegger/nvim-lint'
 Plug 'rmagatti/logger.nvim'
 Plug 'rmagatti/goto-preview'
+
+" code -> lsp
 Plug 'mason-org/mason.nvim'
 Plug 'mason-org/mason-lspconfig.nvim'
 Plug 'neovim/nvim-lspconfig'
+
+" code -> completion
 Plug 'nvim-mini/mini.nvim'
+
+" code -> format
+Plug 'nvimtools/none-ls.nvim'
+Plug 'jay-babu/mason-null-ls.nvim'
 
 " tools
 Plug 'kdheepak/lazygit.nvim'
@@ -43,8 +51,6 @@ set autoindent
 set undofile
 set undodir=~/.local/share/nvim/undo/
 set undolevels=100
-
-colorscheme tokyonight-moon
 
 function! CHeader()
 	let header = expand("%:t:r")

@@ -1,8 +1,15 @@
 
 -- https://github.com/rmagatti/goto-preview
-require('goto-preview').setup({})
+local goto_preview_ok, goto_preview = pcall(require, "goto-preview")
+if goto_preview_ok then
+    goto_preview.setup({})
 
-keymap("n", " gp", "<cmd>lua require('goto-preview').goto_preview_definition()<CR>", opts)
-keymap("n", " gc", "<cmd>lua require('goto-preview').close_all_win()<CR>", opts)
+	keymap("n", "<C-f>", function()
+		goto_preview.goto_preview_definition()
+	end, { desc = "Open preview window of the definition" })
 
-
+	keymap("n", "<A-f>", function()
+		goto_preview.close_all_win()
+		editor_focus()
+	end, { desc = "Close all opened preview windows" })
+end

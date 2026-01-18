@@ -1,3 +1,6 @@
 
 -- https://github.com/nvim-mini/mini.completion
-require('mini.completion').setup()
+local mini_ok, mini_completion = pcall(require, "mini.completion")
+if mini_ok then
+    mini_completion.setup()
+end

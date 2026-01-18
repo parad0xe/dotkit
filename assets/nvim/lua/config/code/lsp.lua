@@ -1,4 +1,5 @@
 
+-- https://github.com/neovim/nvim-lspconfig
 vim.lsp.config('pyright', {
     settings = {
         python = {

@@ -1,9 +1,11 @@
 
-
+-- https://github.com/folke/tokyonight.nvim
 require("tokyonight").setup({
 	transparent = true
 })
 
+
+-- https://github.com/xiyaowong/transparent.nvim
 require("transparent").setup({
 	groups = { -- table: default groups
 		'Normal', 'NormalNC', 'Comment', 'Constant', 'Special', 'Identifier',

@@ -1,4 +1,4 @@
-
+-- https://github.com/mfussenegger/nvim-lint
 local ok, lint = pcall(require, "lint")
 
 if ok then

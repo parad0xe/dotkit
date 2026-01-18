@@ -1,4 +1,5 @@
---require('config.variables')
+
+-- https://github.com/rmagatti/goto-preview
 require('goto-preview').setup({})
 
 keymap("n", " gp", "<cmd>lua require('goto-preview').goto_preview_definition()<CR>", opts)

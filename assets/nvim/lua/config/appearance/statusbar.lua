@@ -1,3 +1,5 @@
+
+-- https://github.com/tamton-aquib/staline.nvim
 require('staline').setup({
 	sections = {
         left = { '- ', '-mode', ' ', 'branch' },

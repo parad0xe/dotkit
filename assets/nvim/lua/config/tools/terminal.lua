@@ -1,5 +1,5 @@
--- https://github.com/akinsho/toggleterm.nvim
 
+-- https://github.com/akinsho/toggleterm.nvim
 require("toggleterm").setup({
 	size = function(term)
 		local lines = vim.o.lines

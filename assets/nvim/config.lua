@@ -3,7 +3,7 @@ vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
 vim.opt.termguicolors = true
 
-require('config.global-variables')
+require('config.globals')
 require('config.navigation.nvim-tree')
 require('config.navigation.telescope')
 require('config.code.mason')

@@ -1,5 +1,6 @@
 
 local ok, lint = pcall(require, "lint")
+
 if ok then
 	if vim.fn.executable("flake8") == 1 then
 	  lint.linters_by_ft.python = lint.linters_by_ft.python or {}
@@ -13,15 +14,17 @@ if ok then
 	  local mypy = lint.linters.mypy
 	  mypy.args = vim.list_extend(
 		  mypy.args or {},
-		  { "--cache-dir=/dev/null" }
+		  { 
+			  "--cache-dir=/dev/null",
+			  "--python-executable", get_python_path()
+		  }
 	  )
 	end
 
 	vim.api.nvim_create_autocmd({ "BufWritePost", "InsertLeave", "BufReadPost", "BufNewFile" }, {
 	  callback = function()
-		-- ne lancer lint que si le fichier a un linter configuré
 		local ft = vim.bo.filetype
-		if lint.linters_by_ft[ft] then
+		if lint.linters_by_ft[ft] and #lint.linters_by_ft[ft] > 0 then
 		  lint.try_lint()
 		end
 	  end,

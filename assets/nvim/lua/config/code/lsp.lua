@@ -14,7 +14,7 @@ if mason_lsp_ok then
 			python = {
 				analysis = {
 					diagnosticMode = "workspace",
-					typeCheckingMode = "strict",
+					typeCheckingMode = "basic",
 					autoSearchPaths = true,
 					useLibraryCodeForTypes = true,
 				}

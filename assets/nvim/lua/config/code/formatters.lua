@@ -10,6 +10,7 @@ if conform_ok then
 			ruff_format = {
 				args = {
 					"format",
+					"--line-length", "79",
 					"--stdin-filename", "$FILENAME",
 					"-",
 				},

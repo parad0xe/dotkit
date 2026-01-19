@@ -1,5 +1,6 @@
 
 -- https://github.com/mfussenegger/nvim-lint
+-- Syntax + Types analysis
 local lint_ok, lint = pcall(require, "lint")
 if lint_ok then
     if vim.fn.executable("flake8") == 1 then

@@ -15,6 +15,7 @@ Plug 'rmagatti/goto-preview'
 
 " code -> lsp
 Plug 'mason-org/mason.nvim'
+Plug 'WhoIsSethDaniel/mason-tool-installer.nvim'
 Plug 'mason-org/mason-lspconfig.nvim'
 Plug 'neovim/nvim-lspconfig'
 
@@ -22,8 +23,7 @@ Plug 'neovim/nvim-lspconfig'
 Plug 'nvim-mini/mini.nvim'
 
 " code -> format
-Plug 'nvimtools/none-ls.nvim'
-Plug 'jay-babu/mason-null-ls.nvim'
+Plug 'stevearc/conform.nvim'
 
 " tools
 Plug 'kdheepak/lazygit.nvim'

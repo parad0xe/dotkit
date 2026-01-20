@@ -20,18 +20,20 @@ if conform_ok then
 					"--style",
 					"{" ..
 						"BASED_ON_STYLE: google," ..
-						"INDENT_WIDTH: 4," ..
+						"COALESCE_BRACKETS: true," ..
 						"COLUMN_LIMIT: 79," ..
+						"DEDENT_CLOSING_BRACKETS: true," ..
+						"INDENT_WIDTH: 4," ..
+						"SPACES_BEFORE_COMMENT: 2," ..
+						"SPACES_AROUND_POWER_OPERATOR: true," ..
+						"SPLIT_ALL_COMMA_SEPARATED_VALUES: false," ..
+						"SPLIT_ALL_TOP_LEVEL_COMMA_SEPARATED_VALUES: true," ..
 						"SPLIT_BEFORE_DOT: true," ..
 						"SPLIT_BEFORE_DICT_SET_GENERATOR: true," ..
-						"SPACES_BEFORE_COMMENT: 2," ..
 						"SPLIT_BEFORE_EXPRESSION_AFTER_OPENING_PAREN: true," ..
 						"SPLIT_BEFORE_FIRST_ARGUMENT: true," ..
-						"COALESCE_BRACKETS: true," ..
-						"DEDENT_CLOSING_BRACKETS: true," ..
-						"SPLIT_ALL_COMMA_SEPARATED_VALUES: true," ..
-						"SPLIT_ALL_TOP_LEVEL_COMMA_SEPARATED_VALUES: true," ..
-						"SPLIT_COMPLEX_COMPREHENSION: true" ..
+						"SPLIT_COMPLEX_COMPREHENSION: true," ..
+						"SPLIT_PENALTY_AFTER_OPENING_BRACKET: 10000000" ..
 					"}"
 				},
 			},
@@ -39,7 +41,7 @@ if conform_ok then
 
 		format_on_save = {
 			lsp_fallback = true,
-			timeout_ms = 500,
+			timeout_ms = 1000,
 		},
 	})
 

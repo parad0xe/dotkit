@@ -9,3 +9,8 @@ if vim.fn.exists(':DogeGenerate') then
 
 	keymap('n', ' x', '<Plug>(doge-generate)', { desc = "Generate Docstring for current cursor position" })
 end
+
+-- https://github.com/camAtGitHub/pydochide.nvim
+-- if vim.fn.exists(':PyDocHide') == 1 then
+-- 	vim.cmd('autocmd FileType python PyDocHide')
+-- end

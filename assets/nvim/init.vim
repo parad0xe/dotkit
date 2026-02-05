@@ -12,6 +12,8 @@ Plug 'kkoomen/vim-doge', { 'do': { -> doge#install() } }
 Plug 'mfussenegger/nvim-lint'
 Plug 'rmagatti/logger.nvim'
 Plug 'rmagatti/goto-preview'
+Plug 'nvim-treesitter/nvim-treesitter'
+Plug 'camAtGitHub/pydochide.nvim'
 
 " code -> lsp
 Plug 'mason-org/mason.nvim'

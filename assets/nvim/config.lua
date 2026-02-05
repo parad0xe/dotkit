@@ -11,6 +11,7 @@ require('config.navigation.telescope')
 
 -- Code
 require('config.code.package-manager')
+require('config.code.treesitter')
 require('config.code.lsp')
 require('config.code.linters')
 require('config.code.formatters')

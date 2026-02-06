@@ -67,3 +67,5 @@ alias gl="git log --oneline"
 
 # git short log by users
 alias gsl="git shortlog"
+
+zoxide init fish | source

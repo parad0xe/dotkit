@@ -8,6 +8,14 @@ module_export_env() {
 	fi
 }
 
+module_enable() {
+	if ! has_real_sudo; then
+		return $RET_MODULE_ENABLE
+	fi
+
+	return $RET_MODULE_DISABLE
+}
+
 module_check() {
 	if ! has_real_sudo; then
 		if ! dir_exists "$JUNEST_ROOT_DIR" || ! command_exists junest; then

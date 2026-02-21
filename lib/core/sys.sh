@@ -43,7 +43,7 @@ has_real_sudo() {
 	fi
 
 	local test_sudo_msg=$(LC_ALL=C sudo -vn 2>&1)
-	echo is_empty "$test_sudo_msg" || "$test_sudo_msg" | grep -q "password is required"
+	is_empty "$test_sudo_msg" || echo "$test_sudo_msg" | grep -q "password is required"
 }
 
 try_sudo() {

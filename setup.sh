@@ -33,8 +33,8 @@ readonly BACKUP_DIR="${HOME}/.local/state/dotfiles_backups/$(date +%Y%m%d_%H%M%S
 readonly RETOK=0
 readonly RETERR=1
 
-readonly RET_MODULE_LOADED=0
-readonly RET_MODULE_SKIP=1
+readonly RET_MODULE_ENABLE=0
+readonly RET_MODULE_DISABLE=1
 
 readonly RET_MODULE_DOEXECUTE=0
 readonly RET_MODULE_DONOTHING=1
@@ -223,9 +223,13 @@ run_modules() {
 		fi
 
 		local env_data=$(
+			module_enable() { return $RET_MODULE_ENABLE; }
 			module_export_env() { return $RETOK; }
 			source "$module" </dev/null >/dev/null 2>&1
-			module_export_env
+
+			if module_enable; then
+				module_export_env
+			fi
 		)
 
 		for pair in $env_data; do
@@ -256,9 +260,14 @@ run_modules() {
 		done
 
 		if (
+            module_enable() { return $RET_MODULE_ENABLE; }
             module_check() { return $RET_MODULE_DONOTHING; }
 
             source "${module}"
+
+			if ! module_enable; then
+				return $RET_MODULE_DONOTHING;
+			fi
 
             case "${RUN_COMMAND}" in
                 install)     	module_check ;;

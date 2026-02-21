@@ -48,11 +48,11 @@ trap 'rm -rf "$TMP_DIR"' EXIT
 #  Helpers
 # ============================================================
 force_confirm() {
-	[[ "${FORCE_CONFIRMATION:-false}" = "true" ]]
+	[[ "${FORCE_CONFIRMATION:-false}" == "true" ]]
 }
 
 dry_run() {
-	[[ "${DRY_RUN:-false}" = "true" ]]
+	[[ "${DRY_RUN:-false}" == "true" ]]
 }
 
 verbose() {
@@ -149,15 +149,28 @@ remove_autoload_shell() {
     if grep -q "# --- BEGIN Autoload" "$default_rc" 2>/dev/null; then
         blank
         info "Cleaning up autoload configuration in $default_rc..."
-        
-        backup_file "$default_rc" 2>/dev/null || true
-        safe_execute sed '/# --- BEGIN Autoload/,/# --- END Autoload/d' "$default_rc" > "${TMP_DIR}/clean_bashrc"
-        safe_mv "${TMP_DIR}/clean_bashrc" > "$default_rc"
-        
-        success "Autoload successfully removed from $default_rc"
+
+		if can_read "$default_rc"; then
+        	backup_file "$default_rc"
+        	safe_execute sed '/# --- BEGIN Autoload/,/# --- END Autoload/d' "$default_rc" > "${TMP_DIR}/clean_bashrc"
+        	safe_mv "${TMP_DIR}/clean_bashrc" "$default_rc"
+
+			blank
+        	success "Autoload successfully removed from $default_rc"
+		else
+			warn "Cannot read $default_rc."
+		fi
     else
         muted "No autoload configuration found to clean."
     fi
+
+	if is_empty "${JUNEST_ENV:-}" && [[ "$SHELL" != "bash" ]]; then
+		if ! dry_run; then
+			exec "bash"
+		else
+			dry "exec bash"
+		fi
+	fi
 }
 
 setup_shell_env() {

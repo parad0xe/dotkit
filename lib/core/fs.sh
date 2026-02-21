@@ -93,23 +93,41 @@ safe_link() {
 }
 
 safe_mv() {
-    local src="$1" dst="$2"
-
-    if [ -e "$dst" ]; then
-        backup_file "$dst"
+    if [ "$#" -lt 2 ]; then
+        warn "safe_mv requires at least two arguments."
+        return $RETERR
     fi
 
-    safe_mkdir "$(dirname "$dst")"
-    safe_execute mv "$src" "$dst"
-    
-    if ! dry_run; then
-		if [ ! -e "$src" ]; then
-			warn "Cannot move: '$src' does not exist."
-			return $RETERR
-		fi
+    local dst="${@: -1}"
+    local srcs=("${@:1:$#-1}")
 
-        step "mv: $src -> $dst"
+    if [ "${#srcs[@]}" -gt 1 ]; then
+        safe_mkdir "$dst"
+    else
+        safe_mkdir "$(dirname "$dst")"
     fi
+
+    for src in "${srcs[@]}"; do
+        if ! dry_run && [ ! -e "$src" ]; then
+            warn "Cannot move: '$src' does not exist."
+            continue
+        fi
+
+        local target_file="$dst"
+        if [ -d "$dst" ]; then
+            target_file="${dst%/}/$(basename "$src")"
+        fi
+
+        if [ -e "$target_file" ]; then
+            backup_file "$target_file"
+        fi
+
+        safe_execute mv "$src" "$dst"
+        
+        if ! dry_run; then
+            step "mv: $src -> $dst"
+        fi
+    done
 }
 
 safe_rm() {
@@ -162,7 +180,7 @@ backup_file() {
     local dest_backup="$BACKUP_DIR/$rel_path"
     
     safe_mkdir "$(dirname "$dest_backup")" 
-    safe_execute mv "$target" "$dest_backup"
+    safe_execute cp -r "$target" "$dest_backup"
 
 	if ! dry_run; then
     	muted "Backup created: -> $dest_backup"

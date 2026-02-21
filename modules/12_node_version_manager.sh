@@ -4,13 +4,13 @@ module_check() {
     case "$TARGET_SHELL" in
         fish)
             if ! fish_command_exists "nvm"; then
-                return $RET_MODULECHECK_REQUIRE_INSTALL
+                return $RET_MODULE_DOEXECUTE
             fi
             ;;
         *)
             export NVM_DIR="$HOME/.nvm"
             if ! non_empty_file "$NVM_DIR/nvm.sh"; then
-                return $RET_MODULECHECK_REQUIRE_INSTALL
+                return $RET_MODULE_DOEXECUTE
             fi
             ;;
     esac
@@ -41,6 +41,22 @@ module_configure() {
     
     blank
     success "Nvm environment check complete"
+}
+
+module_uninstall() {
+    header "Uninstalling nvm"
+    
+    if safe_rm "$HOME/.nvm"; then
+        if [[ "$TARGET_SHELL" == "fish" ]] && fish_command_exists "fisher"; then
+            info "Removing nvm.fish plugin..."
+            safe_execute fish -c "fisher remove jorgebucaran/nvm.fish" 2>/dev/null || true
+        fi
+        
+		blank
+        success "Nvm and node versions uninstalled"
+    else
+        muted "Nvm uninstallation skipped."
+    fi
 }
 
 # --- Internal helpers ---

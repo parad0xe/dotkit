@@ -4,13 +4,13 @@ module_check() {
     case "$TARGET_SHELL" in
         fish)
             if ! fish_command_exists "fisher"; then
-                return $RET_MODULECHECK_REQUIRE_INSTALL
+                return $RET_MODULE_DOEXECUTE
             fi
             ;;
     esac
     
     if ! command_exists "zoxide"; then
-        return $RET_MODULECHECK_REQUIRE_INSTALL
+        return $RET_MODULE_DOEXECUTE
     fi
 
     return $RET_MODULECHECK_DONOTHING
@@ -48,26 +48,50 @@ module_configure() {
     case "$TARGET_SHELL" in
         fish)
             safe_mkdir "$HOME/.config/fish"
-            
-            step "Linking config.fish..."
             safe_link "$ASSETS_DIR/shell/fish/config.fish" "$HOME/.config/fish/config.fish"
-            
-            blank
-            info "Synchronizing fish functions..."
             safe_link_all "$ASSETS_DIR/shell/fish/functions" "$HOME/.config/fish/functions"
             ;;
         bash)
-            step "Linking .bashrc..."
             safe_link "$ASSETS_DIR/shell/bash/.bashrc" "$HOME/.bashrc"
             ;;
         zsh)
-            step "Linking .zshrc..."
             safe_link "$ASSETS_DIR/shell/zsh/.zshrc" "$HOME/.zshrc"
             ;;
     esac
 
     blank
     success "$TARGET_SHELL environment synchronized"
+}
+
+module_uninstall() {
+    header "Uninstalling shell environment configurations and tools"
+    
+    if force_confirm || confirm "Do you want to remove $TARGET_SHELL configurations and associated tools (zoxide, fisher)?"; then
+        info "Removing shell environment tools..."
+        
+        safe_rm "$LOCAL_BIN_DIR/zoxide"
+
+        if target_shell_is "fish" && fish_command_exists "fisher"; then
+			blank
+            info "Uninstalling fisher and its plugins..."
+            safe_execute fish -c "fisher remove jorgebucaran/fisher"
+        fi
+
+		blank
+        info "Removing shell configuration links..."
+
+        case "$TARGET_SHELL" in
+            fish) 
+                safe_rm \
+                    "$HOME/.config/fish/functions"
+                ;;
+        esac
+
+        blank
+        success "$TARGET_SHELL environment and tools removed (consider restoring your backups)"
+    else
+        muted "Shell configuration uninstallation skipped."
+    fi
 }
 
 # --- Internal helpers ---

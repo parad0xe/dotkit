@@ -1,17 +1,20 @@
 #!/bin/bash
 
 module_init() {
-    export PATH="$JUNEST_EXEC_DIR:$PATH:$JUNEST_BIN_WRAPPERS_DIR"
-
-	if ! has_sudo || dir_exists "$JUNEST_ROOT_DIR"; then
-    	ID="arch"
+	if has_real_sudo; then
+		return $RET_MODULE_SKIP
 	fi
+
+	export PATH="$JUNEST_EXEC_DIR:$PATH:$JUNEST_BIN_WRAPPERS_DIR"
+    ID="arch"
+
+	return $RET_MODULE_LOADED
 }
 
 module_check() {
-	if ! has_sudo; then
+	if ! has_real_sudo; then
 		if ! dir_exists "$JUNEST_ROOT_DIR" || ! command_exists junest; then
-			return $RET_MODULECHECK_REQUIRE_INSTALL
+			return $RET_MODULE_DOEXECUTE
 		fi
 	fi
 
@@ -23,11 +26,12 @@ module_install() {
 	
     warn "Sudo access not detected. To proceed without root, junest is required"
 	
-	if force_confirm || confirm "Install junest in $JUNEST_DIR and continue ?"; then
+	if force_confirm || confirm "Install junest in $JUNEST_DIR and continue?"; then
 		_install_junest
 	else
-		err "Unprivileged environment setup declined"
-		fatal "This script requires either sudo or junest to manage system dependencies"
+		fatal \
+			"Unprivileged environment setup declined" \
+			"This script requires either sudo or junest to manage system dependencies"
 	fi
 
 	blank
@@ -42,6 +46,17 @@ module_configure() {
     
     blank
     success "Junest environment is ready"
+}
+
+module_uninstall() {
+    header "Uninstalling junest"
+    
+	if safe_rm "$JUNEST_ROOT_DIR" "$JUNEST_DIR"; then
+		blank
+		success "Junest uninstalled"
+    else
+        muted "Junest uninstallation skipped."
+    fi
 }
 
 # --- Internal helpers ---

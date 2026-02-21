@@ -2,7 +2,7 @@
 
 module_check() {
     if ! file_exists "$HOME/.gitconfig"; then
-        return $RET_MODULECHECK_REQUIRE_INSTALL
+        return $RET_MODULE_DOEXECUTE
     fi
 
     return $RET_MODULECHECK_DONOTHING
@@ -50,11 +50,22 @@ module_configure() {
 EOF
 
 		backup_file $output
-		safe_execute mv $tmp $output
+		safe_mv $tmp $output
 
 		blank
         success "Git configuration file generated at $output"
 	else
 		muted "Skipped git configuration."
+    fi
+}
+
+module_uninstall() {
+    header "Uninstalling git configuration"
+    
+    if safe_rm "$HOME/.gitconfig"; then
+		blank
+        success "Git configuration removed (consider restoring your backups)"
+    else
+        muted "Git configuration uninstallation skipped."
     fi
 }

@@ -2,7 +2,7 @@
 
 module_check() {
     if ! command_exists "lazygit"; then
-        return $RET_MODULECHECK_REQUIRE_INSTALL
+        return $RET_MODULE_DOEXECUTE
     fi
 
     return $RET_MODULECHECK_DONOTHING
@@ -19,6 +19,17 @@ module_install() {
 
 module_configure() {
     return $RETOK
+}
+
+module_uninstall() {
+    header "Uninstalling lazygit"
+    
+    if safe_rm "$LOCAL_BIN_DIR/lazygit"; then
+		blank
+        success "Lazygit uninstalled"
+    else
+        muted "Lazygit uninstallation skipped."
+    fi
 }
 
 # --- Internal helpers ---
@@ -48,7 +59,7 @@ _install_lazygit() {
 	safe_execute tar -xf "$TMP_DIR/$archive_name" -C "$TMP_DIR" "$bin"
 	
 	safe_mkdir "$LOCAL_BIN_DIR"
-	safe_execute mv "$TMP_DIR/$bin" "$LOCAL_BIN_DIR/$bin"
+	safe_mv "$TMP_DIR/$bin" "$LOCAL_BIN_DIR/$bin"
    
 	success "Lazygit installed successfully in $LOCAL_BIN_DIR"
 }

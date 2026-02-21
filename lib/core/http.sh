@@ -4,11 +4,6 @@ get_github_latest_release() {
     local repo="$1"
     local fallback="${2:-}"
     local latest_version
-   
-	if dry_run; then
-		echo "v0.0.0"
-		return
-	fi
 
     latest_version=$(curl -s --connect-timeout 5 "https://api.github.com/repos/${repo}/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
     

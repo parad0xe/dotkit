@@ -1,7 +1,7 @@
 #!/bin/bash
 
 module_check() {
-    return $RET_MODULECHECK_REQUIRE_INSTALL
+    return $RET_MODULE_DOEXECUTE
 }
 
 module_install() {
@@ -37,5 +37,12 @@ module_install() {
 }
 
 module_configure() {
+    return $RETOK
+}
+
+module_uninstall() {
+    header "Uninstalling system dependencies"
+    info "Skipping system packages uninstallation to prevent OS breakage."
+    muted "Packages like curl, git, python3 remain installed."
     return $RETOK
 }

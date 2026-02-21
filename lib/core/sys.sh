@@ -41,7 +41,7 @@ safe_execute() {
     fi
 }
 
-has_sudo() {
+has_real_sudo() {
 	if ! command_exists sudo; then
 		return $RETERR
 	fi

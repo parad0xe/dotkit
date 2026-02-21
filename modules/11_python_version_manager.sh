@@ -2,7 +2,7 @@
 
 module_check() {
     if ! dir_exists "$HOME/.pyenv"; then
-        return $RET_MODULECHECK_REQUIRE_INSTALL
+        return $RET_MODULE_DOEXECUTE
     fi
 
     return $RET_MODULECHECK_DONOTHING
@@ -40,7 +40,7 @@ module_configure() {
 			} >> "${TMP_DIR}/.pyenv_rc"
 
 			backup_file "$TARGET_SHELL_RC"
-			safe_execute mv "${TMP_DIR}/.pyenv_rc" "$TARGET_SHELL_RC"
+			safe_mv "${TMP_DIR}/.pyenv_rc" "$TARGET_SHELL_RC"
 
 			success "Configuration injected into $TARGET_SHELL_RC"
 		else
@@ -65,16 +65,23 @@ module_configure() {
     success "$TARGET_SHELL pyenv environment is ready"
 }
 
+module_uninstall() {
+    header "Uninstalling pyenv"
+    
+    if safe_rm "$HOME/.pyenv"; then
+		blank
+        success "Pyenv binaries and environments removed"
+    else
+        muted "Pyenv uninstallation skipped."
+    fi
+}
+
 # --- Internal helpers ---
 
 _install_pyenv() {
     info "Installing pyenv (python version manager)..."
     
 	ensure_has_command "curl"
-
-	if [[ "$RUN_COMMAND" == "reinstall" ]]; then
-		safe_execute rm -rf "$HOME/.pyenv"
-	fi
 
 	safe_execute curl -fsSL https://pyenv.run | bash
 	success "Pyenv binaries installed successfully"

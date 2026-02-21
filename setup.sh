@@ -1,7 +1,13 @@
 #!/bin/bash
 
+# ============================================================
+#  Configuration & Security
+# ============================================================
 set -euo pipefail
 
+# ------------------------------------------------------------
+# Global variables (modified by flags)
+# ------------------------------------------------------------
 RUN_COMMAND=""
 FORCE_CONFIRMATION="false"
 DRY_RUN="false"
@@ -9,8 +15,11 @@ VERBOSE=1
 TARGET_SHELL=""
 TARGET_SHELL_RC=""
 
+# ------------------------------------------------------------
+# Constants
+# ------------------------------------------------------------
 readonly PROJECT_ROOT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
-readonly TMP_DIR="$(mktemp -d)"
+readonly TMP_DIR="$(mktemp -d -t dotfiles.XXXXXX)"
 readonly ASSETS_DIR="$PROJECT_ROOT_DIR/assets"
 readonly LOCAL_BIN_DIR="${HOME}/.local/bin"
 readonly LOCAL_FONT_DIR="${HOME}/.local/share/fonts"
@@ -24,9 +33,20 @@ readonly BACKUP_DIR="${HOME}/.local/state/dotfiles_backups/$(date +%Y%m%d_%H%M%S
 readonly RETOK=0
 readonly RETERR=1
 
-readonly RET_MODULECHECK_REQUIRE_INSTALL=0
-readonly RET_MODULECHECK_DONOTHING=1
+readonly RET_MODULE_LOADED=0
+readonly RET_MODULE_SKIP=1
 
+readonly RET_MODULE_DOEXECUTE=0
+readonly RET_MODULE_DONOTHING=1
+
+# ============================================================
+#  Cleanup
+# ============================================================
+trap 'rm -rf "$TMP_DIR"' EXIT
+
+# ============================================================
+#  Helpers
+# ============================================================
 force_confirm() {
 	[[ "${FORCE_CONFIRMATION:-false}" = "true" ]]
 }
@@ -39,36 +59,38 @@ verbose() {
 	echo ${VERBOSE:-1}
 }
 
-
-shopt -s nullglob
-
+# ============================================================
+#  Load Libraries
+# ============================================================
 for core_lib in "${PROJECT_ROOT_DIR}/lib/core/"*.sh; do
     source "$core_lib"
 done
 
-for action_lib in "${PROJECT_ROOT_DIR}/lib/actions/"*.sh; do
-    source "$action_lib"
-done
-
-shopt -u nullglob
-
+# ============================================================
+#  Usage
+# ============================================================
 usage() {
 	blank
-	log "Usage: $0 [-yjdvhs] {install|reinstall|reconfigure|uninstall}"
-	log "	-y|--yes         force all confirmations"
-	log "	-d|--dry-run     simulate setup"
-	log "	-s|--shell       target shell (bash|zsh|fish)"
-	log "	-v|--verbose     verbose output"
-	log "	-h|--help        print this help"
-	exit $RETERR
+    cat <<EOF
+Usage: $(basename "$0") [OPTIONS] {install|reinstall|reconfigure|uninstall}
+
+Options:
+  -y, --yes         Force all confirmations
+  -d, --dry-run     Simulate execution (no changes)
+  -s, --shell       Target a specific shell (bash|zsh|fish)
+  -v, --verbose     Verbose output
+  -h, --help        Print this help message
+EOF
+    exit $RETERR
 }
 
+# ============================================================
+#  Shell Environment Logic
+# ============================================================
 setup_shell_env() {
-	if is_not_empty "$TARGET_SHELL"; then
-        if [[ ! "$TARGET_SHELL" =~ ^(bash|zsh|fish)$ ]]; then
-            warn "Invalid shell '$TARGET_SHELL' provided. Reverting to detection."
-            TARGET_SHELL=""
-        fi
+	if is_not_empty "$TARGET_SHELL" && [[ ! "$TARGET_SHELL" =~ ^(bash|zsh|fish)$ ]]; then
+		warn "Invalid shell '${TARGET_SHELL}' provided. Reverting to auto-detection..."
+		TARGET_SHELL=""
     fi
 
 	if is_empty "$TARGET_SHELL"; then
@@ -78,19 +100,15 @@ setup_shell_env() {
         if force_confirm; then
             TARGET_SHELL="$detected_shell"
         else
-            info "Please select the shell you want to configure:"
-            local default_idx=1
-            [[ "$detected_shell" == "zsh" ]] && default_idx=2
-            [[ "$detected_shell" == "fish" ]] && default_idx=3
-
-            printf "Available: (1) bash, (2) zsh, (3) fish [Default: $detected_shell]: "
-            read -r choice
-            case "$choice" in
-                1|bash) TARGET_SHELL="bash" ;;
-                2|zsh)  TARGET_SHELL="zsh" ;;
-                3|fish) TARGET_SHELL="fish" ;;
-                *)      TARGET_SHELL="$detected_shell" ;;
-            esac
+			info "Please select the shell you want to configure:"
+            PS3="Selection (enter number): "
+				
+			select opt in bash zsh fish; do
+				case $opt in
+					bash|zsh|fish) TARGET_SHELL=$opt; break ;;
+					*) echo "Invalid option: $REPLY";;
+				esac
+			done
         fi
     fi
     
@@ -101,57 +119,121 @@ setup_shell_env() {
 		*) fatal "Unsupported shell: $TARGET_SHELL. No configuration file found." ;;
 	esac
 
-    success "Target shell set to: $TARGET_SHELL"
-	success "Target configuration file identified: $TARGET_SHELL_RC"
+	blank
+	success "Target: ${TARGET_SHELL} → ${TARGET_SHELL_RC}"
 }
 
-load_all_modules() {
-    shopt -s nullglob
+# ============================================================
+#  Module Manager
+# ============================================================
+run_modules() {
+	local -a modules_to_run=()
 
+	log "Analyzing modules..."
 	for module in "${PROJECT_ROOT_DIR}/modules"/*.sh; do
-		module_init() { return $RETOK; }
-		module_check() { return $RET_MODULECHECK_DONOTHING; }
-		module_install() { return $RETOK; }
-		module_configure() { return $RETOK; }
-
-
-        if can_read "$module"; then
-			source "$module"
-
-			case "$RUN_COMMAND" in
-				install)
-					module_init
-					if module_check; then
-						module_install
-						module_configure
-					fi
-					;;
-				reinstall)
-					module_init
-					module_install
-					module_configure
-					;;
-				reconfigure)
-					module_init
-					if ! module_check; then
-						module_configure
-					fi
-					;;
-			esac
-		else
-			fatal "Module $module cannot be read."
+		if ! can_read "$module"; then
+			continue
 		fi
-		
-		unset -f module_init module_check module_install module_configure
+
+		if (
+            # Isolated subshell
+            module_init()  { return $RET_MODULE_LOADED; }
+            module_check() { return $RET_MODULECHECK_DONOTHING; }
+
+            source "${module}"
+
+			if ! module_init; then
+				return $RETERR
+			fi
+
+            case "${RUN_COMMAND}" in
+                install)     	module_check ;;
+                reinstall)   	return $RET_MODULE_DOEXECUTE ;;
+                reconfigure) 	! module_check ;;
+                uninstall) 		return $RET_MODULE_DOEXECUTE ;;
+                *)				return $RET_MODULECHECK_DONOTHING ;;
+            esac
+        ); then
+            modules_to_run+=("${module}")
+        fi
 	done
-    
-    shopt -u nullglob
+
+	if [[ ${#modules_to_run[@]} -eq 0 ]]; then
+        log "No modules to process."
+        return
+    fi
+
+	blank
+	log "Selected modules for ${RUN_COMMAND}:"
+    for module in "${modules_to_run[@]}"; do
+		local display_name="${module##*/}"
+		display_name="${display_name#*_}"
+		display_name="${display_name%.sh}"
+		step "$display_name"
+	done
+
+    if ! force_confirm; then
+		blank
+		if ! confirm "Do you want to continue?"; then
+			fatal "Aborted by user."
+		fi
+    fi
+
+	blank
+	for module in "${modules_to_run[@]}"; do
+		local display_name="${module##*/}"
+		display_name="${display_name#*_}"
+		display_name="${display_name%.sh}"
+		if ! can_read "$module"; then
+			warn "$module does not exists on system. skipping."
+			continue
+		fi
+
+		blank
+        info "Executing: $display_name"
+
+        (
+			module_init()      { return $RET_MODULE_LOADED; }
+            module_install()   { return $RETOK; }
+            module_uninstall()   { return $RETOK; }
+            module_configure() { return $RETOK; }
+
+            source "${module}"
+
+            if ! module_init; then
+				warn "skip $module"
+				return $RETOK
+			fi
+
+			case "${RUN_COMMAND}" in
+                install)
+                    module_install
+                    module_configure
+                    ;;
+                reinstall)
+                    info "Starting reinstallation sequence..."
+                    module_uninstall
+                    module_install
+                    module_configure
+                    ;;
+                reconfigure)
+                    module_configure
+                    ;;
+                uninstall)
+                    module_uninstall
+                    ;;
+            esac
+        ) || fatal "An error occurred in module: ${module}"
+    done
 }
 
 target_shell_is() {
 	[[ "$TARGET_SHELL" == "$1" ]]
 }
 
+# ============================================================
+#  Argument Parsing
+# ============================================================
 while [[ $# -gt 0 ]]; do
     case "$1" in
         -y|--yes) FORCE_CONFIRMATION="true"; shift ;;
@@ -178,36 +260,55 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-detect_os
-
-if [[ "$RUN_COMMAND" =~ ^install|reinstall|reconfigure$ ]]; then
-    setup_shell_env
-fi
-
 readonly ARCH=$(uname -m)
-readonly IS_VERBOSE=$([ "$(verbose)" == "2" ] && echo "true" || echo "false")
+readonly IS_VERBOSE=$([ "$VERBOSE" == "2" ] && echo "true" || echo "false")
 
-header \
-    "Runtime configuration" \
-    "" \
-    "User            : $USER" \
-    "OS              : $ID ($ARCH)" \
-    "Target shell    : ${TARGET_SHELL:-none}" \
-    "Target shell RC : ${TARGET_SHELL_RC:-none}" \
-    "Command         : $RUN_COMMAND" \
-    "Force confirms  : $FORCE_CONFIRMATION" \
-    "Dry run         : $DRY_RUN" \
-    "Verbose         : $IS_VERBOSE" \
-    "" \
-    "Directories" \
-    "Project root   : $PROJECT_ROOT_DIR" \
-    "Assets         : $ASSETS_DIR" \
-    "Backup folder  : $BACKUP_DIR" \
-    "Local fonts    : $LOCAL_FONT_DIR"
+# ============================================================
+#  Main
+# ============================================================
+main() {
+	detect_os
+	setup_shell_env
 
-case $RUN_COMMAND in
-	install|reinstall) install ;;
-	reconfigure) reconfigure ;;
-	uninstall) uninstall ;;
-	*) usage ;;
-esac
+	header \
+		"Runtime configuration" \
+		"" \
+		"User            : $USER" \
+		"OS              : $ID ($ARCH)" \
+		"Target shell    : ${TARGET_SHELL:-none}" \
+		"Target shell RC : ${TARGET_SHELL_RC:-none}" \
+		"Command         : $RUN_COMMAND" \
+		"Force confirms  : $FORCE_CONFIRMATION" \
+		"Dry run         : $DRY_RUN" \
+		"Verbose         : $IS_VERBOSE" \
+		"" \
+		"Directories" \
+		"Project root   : $PROJECT_ROOT_DIR" \
+		"Assets         : $ASSETS_DIR" \
+		"Backup folder  : $BACKUP_DIR" \
+		"Local fonts    : $LOCAL_FONT_DIR"
+
+	run_modules
+
+	blank
+	case $RUN_COMMAND in
+		install)
+			success "Installation complete"
+			tips "Restart your shell and run :PlugInstall inside nvim"
+			;;
+		reinstall)
+			success "Reinstallation complete"
+			tips "Restart your shell and run :PlugInstall inside nvim"
+			;;
+		reconfigure)
+			success "Reconfigure complete"
+			tips "Restart your shell and run :PlugInstall inside nvim"
+			;;
+		uninstall)
+			success "Uninstallation complete"
+			;;
+		*) usage ;;
+	esac
+}
+
+main

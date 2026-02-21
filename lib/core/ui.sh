@@ -31,13 +31,19 @@ info()    { printf "${CB_CYAN} ➜ ${C_RESET} %s\n" "$1"; }
 success() { printf "${CB_GREEN} ✔ ${C_RESET} %s\n" "$1"; }
 warn()    { printf "${CB_YELLOW} ⚠ ${C_RESET} %s\n" "$1" >&2; }
 err()     { printf "${CB_RED} ✖ ${C_RESET} %s\n" "$1" >&2; }
-tips()    { printf "${CB_PURPLE} 💡${C_RESET} %s\n" "$1"; } # 💡 prend souvent 2 espaces
+tips()    { printf "${CB_PURPLE} 💡${C_RESET} %s\n" "$1"; }
 
 # Details and sub-actions (level 2)
 step()    { printf "    ${CB_BLUE}•${C_RESET} %s\n" "$1"; }
 muted()   { printf "      ${C_GRAY}%s${C_RESET}\n" "$1"; }
 
-fatal()   { blank; err "$1"; exit ${RETERR:-1}; }
+fatal()   {
+	blank
+	for e in "$@"; do
+		err "$e"
+	done
+	exit ${RETERR:-1}
+}
 
 dry() {
     if dry_run; then

@@ -8,25 +8,25 @@ module_init() {
 
 module_check() {
 	if ! command_exists "nvim" && ! file_exists "$HOME/.local/bin/nvim"; then
-        return $RET_MODULECHECK_REQUIRE_INSTALL
+        return $RET_MODULE_DOEXECUTE
     fi
 
     local plug_path="${XDG_DATA_HOME:-$HOME/.local/share}/nvim/site/autoload/plug.vim"
     if ! file_exists "$plug_path"; then
-        return $RET_MODULECHECK_REQUIRE_INSTALL
+        return $RET_MODULE_DOEXECUTE
     fi
 
     case "$TARGET_SHELL" in
         fish)
             if ! fish_command_exists "tree-sitter"; then
-                return $RET_MODULECHECK_REQUIRE_INSTALL
+                return $RET_MODULE_DOEXECUTE
             fi
             ;;
         *)
             export NVM_DIR="$HOME/.nvm"
             non_empty_file "$NVM_DIR/nvm.sh" && \. "$NVM_DIR/nvm.sh" >/dev/null 2>&1
             if ! command_exists "tree-sitter"; then
-                return $RET_MODULECHECK_REQUIRE_INSTALL
+                return $RET_MODULE_DOEXECUTE
             fi
             ;;
     esac
@@ -95,10 +95,7 @@ module_configure() {
 
     blank
     info "Linking core configuration files..."
-    step "Linking config.lua..."
     safe_link "$ASSETS_DIR/tools/nvim/config.lua" "$HOME/.config/nvim/config.lua"
-    
-    step "Linking init.vim..."
     safe_link "$ASSETS_DIR/tools/nvim/init.vim" "$HOME/.config/nvim/init.vim"
 
     blank
@@ -107,6 +104,22 @@ module_configure() {
 
     blank
     success "Neovim environment synchronized"
+}
+
+module_uninstall() {
+    header "Uninstalling neovim & code tools"
+    
+    if safe_rm \
+            "$HOME/.config/nvim" \
+            "${XDG_DATA_HOME:-$HOME/.local/share}/nvim" \
+            "${XDG_STATE_HOME:-$HOME/.local/state}/nvim" \
+            "${XDG_CACHE_HOME:-$HOME/.cache}/nvim" \
+            "$HOME/.local/bin/nvim"; then
+		blank
+        success "Neovim and editor tools uninstalled"
+    else
+        muted "Neovim uninstallation skipped."
+    fi
 }
 
 # --- Internal helpers ---

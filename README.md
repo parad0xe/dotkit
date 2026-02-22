@@ -121,7 +121,7 @@ The architecture relies on independent Bash scripts executed sequentially. The o
 
 ## Tutorial: Creating a Module
 
-Example of integrating a simple configuration file (`.vimrc`).
+Example of integrating a simple configuration file for vim.
 
 1. Directory creation and adding the static file:
 ```bash
@@ -202,7 +202,7 @@ Module example (`modules/30_ssh.sh`) illustrating the generation of an SSH key:
 
 module_export_env() {
     # Export of the SSH_DIR variable
-    printf '%s=%sn' "SSH_DIR" "$TMP_DIR/.ssh"
+    printf '%s=%s\n' "SSH_DIR" "$TMP_DIR/.ssh"
 }
 
 module_enable() {

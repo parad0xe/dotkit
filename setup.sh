@@ -42,19 +42,29 @@ readonly RET_MODULE_DONOTHING=1
 # ============================================================
 #  Cleanup
 # ============================================================
+
+# Ensures the temporary directory is removed upon script exit.
 trap 'rm -rf "$TMP_DIR"' EXIT
 
 # ============================================================
 #  Helpers
 # ============================================================
+
+# Checks if the non-interactive (force confirmation) mode is enabled.
+# Returns:
+#   Success (0) if enabled, error (1) otherwise.
 force_confirm() {
 	[[ "${FORCE_CONFIRMATION:-false}" == "true" ]]
 }
 
+# Checks if the dry-run (simulation) mode is enabled.
+# Returns:
+#   Success (0) if enabled, error (1) otherwise.
 dry_run() {
 	[[ "${DRY_RUN:-false}" == "true" ]]
 }
 
+# Returns the current verbosity level.
 verbose() {
 	echo ${VERBOSE:-1}
 }
@@ -62,6 +72,8 @@ verbose() {
 # ============================================================
 #  Load Libraries
 # ============================================================
+
+# Sources all core library scripts required for the framework to function.
 for core_lib in "${PROJECT_ROOT_DIR}/lib/core/"*.sh; do
     source "$core_lib"
 done
@@ -69,6 +81,8 @@ done
 # ============================================================
 #  Usage
 # ============================================================
+
+# Displays the help menu detailing available commands and options, then exits.
 usage() {
 	blank
     cat <<EOF
@@ -87,6 +101,10 @@ EOF
 # ============================================================
 #  Shell Environment Logic
 # ============================================================
+
+# Injects an autoload configuration block into the default bashrc.
+# This ensures that if the user selects an alternative shell (e.g., Zsh or Fish),
+# it is automatically launched when a new interactive terminal session starts.
 autoload_shell() {
     local default_rc="$HOME/.bashrc"
 
@@ -144,6 +162,8 @@ EOF
 	fi
 }
 
+# Removes the previously injected autoload configuration block from the default bashrc.
+# Switches the current session back to bash if applicable.
 remove_autoload_shell() {
     local default_rc="$HOME/.bashrc"
 
@@ -173,6 +193,9 @@ remove_autoload_shell() {
 	fi
 }
 
+# Determines the target shell for the environment setup.
+# Uses user input, command-line flags, or auto-detection to set TARGET_SHELL 
+# and its corresponding configuration file path (TARGET_SHELL_RC).
 setup_shell_env() {
 	if is_not_empty "$TARGET_SHELL" && [[ ! "$TARGET_SHELL" =~ ^(bash|zsh|fish)$ ]]; then
 		warn "Invalid shell '${TARGET_SHELL}' provided. Reverting to auto-detection..."
@@ -212,6 +235,10 @@ setup_shell_env() {
 # ============================================================
 #  Module Manager
 # ============================================================
+
+# Discovers, evaluates, and sequentially executes the available modules 
+# based on the selected command (install, reinstall, reconfigure, uninstall).
+# Orchestrates environment variable exports and lifecycle hooks.
 run_modules() {
 	local -a modules_to_run=()
 
@@ -343,6 +370,9 @@ run_modules() {
     done	
 }
 
+# Evaluates whether the configured target shell matches a given string.
+# Arguments:
+#   $1: The shell name to test against (e.g., "bash").
 target_shell_is() {
 	[[ "$TARGET_SHELL" == "$1" ]]
 }
@@ -350,6 +380,7 @@ target_shell_is() {
 # ============================================================
 #  Argument Parsing
 # ============================================================
+
 while [[ $# -gt 0 ]]; do
     case "$1" in
         -y|--yes) FORCE_CONFIRMATION="true"; shift ;;
@@ -382,6 +413,10 @@ readonly IS_VERBOSE=$([ "$VERBOSE" == "2" ] && echo "true" || echo "false")
 # ============================================================
 #  Main
 # ============================================================
+
+# The primary entry point of the script. 
+# Orchestrates OS detection, configuration output, module execution, 
+# and post-installation shell adjustments.
 main() {
 	detect_os
 	setup_shell_env

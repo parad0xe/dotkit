@@ -22,21 +22,55 @@ readonly CB_PURPLE="\033[1;35m"
 readonly CB_CYAN="\033[1;36m"
 readonly CB_WHITE="\033[1;37m"
 
-
+# Outputs an empty line to standard output for visual spacing.
 blank() { echo ""; }
 
-# Main actions (level 1)
+# Prints a standard log message with a leading space.
+# Arguments:
+#   $1: The message to print.
 log()    { printf " %s\n" "$1"; }
+
+# Prints an informational message prefixed with a bold cyan arrow.
+# Arguments:
+#   $1: The informational message to print.
 info()    { printf "${CB_CYAN} ➜ ${C_RESET} %s\n" "$1"; }
+
+# Prints a success message prefixed with a bold green checkmark.
+# Arguments:
+#   $1: The success message to print.
 success() { printf "${CB_GREEN} ✔ ${C_RESET} %s\n" "$1"; }
+
+# Prints a warning message prefixed with a bold yellow warning icon.
+# Outputs to standard error (stderr).
+# Arguments:
+#   $1: The warning message to print.
 warn()    { printf "${CB_YELLOW} ⚠ ${C_RESET} %s\n" "$1" >&2; }
+
+# Prints an error message prefixed with a bold red cross.
+# Outputs to standard error (stderr).
+# Arguments:
+#   $1: The error message to print.
 err()     { printf "${CB_RED} ✖ ${C_RESET} %s\n" "$1" >&2; }
+
+# Prints a helpful tip prefixed with a purple lightbulb icon.
+# Arguments:
+#   $1: The tip message to print.
 tips()    { printf "${CB_PURPLE} 💡${C_RESET} %s\n" "$1"; }
 
-# Details and sub-actions (level 2)
+# Prints a secondary-level step message, indented with a bold blue bullet point.
+# Used to detail sub-actions under a main task.
+# Arguments:
+#   $1: The step description to print.
 step()    { printf "    ${CB_BLUE}•${C_RESET} %s\n" "$1"; }
+
+# Prints a deeply indented, grayed-out message for minor details or skipped actions.
+# Arguments:
+#   $1: The muted message to print.
 muted()   { printf "      ${C_GRAY}%s${C_RESET}\n" "$1"; }
 
+# Logs one or multiple error messages and immediately aborts the script execution.
+# Arguments:
+#   $@: A list of error messages to print before exiting.
 fatal()   {
 	blank
 	for e in "$@"; do
@@ -45,12 +79,20 @@ fatal()   {
 	exit ${RETERR:-1}
 }
 
+# Logs a simulated command execution if the script is running in dry-run mode.
+# Formats the output with a yellow [DRY RUN] prefix and directs it to stderr.
+# Arguments:
+#   $*: The simulated command and its arguments.
 dry() {
     if dry_run; then
         printf "    ${CB_YELLOW}• [DRY RUN]${C_GRAY} %s${C_RESET}\n" "$*" >&2
     fi
 }
 
+# Renders a stylized, boxed header around the provided text lines. 
+# Useful for defining distinct sections within the script's output.
+# Arguments:
+#   $@: The lines of text to include inside the header box.
 header() {
     [[ $# -eq 0 ]] && return
 
@@ -78,6 +120,12 @@ header() {
     blank
 }
 
+# Prompts the user for a yes/no confirmation before proceeding.
+# Arguments:
+#   $1: (Optional) A custom prompt message. Defaults to "Are you sure ?".
+# Returns:
+#   Success (0) if the user answers yes (y/Y/yes).
+#   Error (1) if the user answers no or anything else.
 confirm() {
     local prompt="${1:-Are you sure ?} [y/N] "
     read -r -p " ${prompt}" response

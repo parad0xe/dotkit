@@ -1,5 +1,13 @@
 #!/bin/bash
 
+# Fetches the latest release tag name for a given GitHub repository using the GitHub API.
+# If the API request fails (e.g., due to rate limits or network issues), it returns 
+# a provided fallback version. If no fallback is provided, it triggers a fatal error.
+# Arguments:
+#   $1: The GitHub repository in the format "owner/repository" (e.g., "jesseduffield/lazygit").
+#   $2: (Optional) A fallback version string to use if the fetch fails.
+# Outputs:
+#   Prints the fetched version string (or the fallback version) to standard output.
 get_github_latest_release() {
     local repo="$1"
     local fallback="${2:-}"

@@ -1,25 +1,45 @@
 #!/bin/bash
 
+# Checks if the provided string is empty.
+# Arguments:
+#   $1: The string to evaluate.
 is_empty() {
 	[[ -z "$1" ]]
 }
 
+# Checks if the provided string is not empty.
+# Arguments:
+#   $1: The string to evaluate.
 is_not_empty() {
 	[[ -n "$1" ]]
 }
 
+
+# Checks if the given path exists and is a regular file.
+# Arguments:
+#   $1: Path to the file.
 file_exists() {
 	[[ -f "$1" ]]
 }
 
+# Checks if the given path is a file and has a size greater than zero.
+# Arguments:
+#   $1: Path to the file.
 non_empty_file() {
 	[[ -s "$1" ]]
 }
 
+# Checks if the given path exists and is a directory.
+# Arguments:
+#   $1: Path to the directory.
 dir_exists() {
 	[[ -d "$1" ]]
 }
 
+# Ensures a specific file exists. Aborts the script if the file is missing,
+# unless the script is running in dry-run mode.
+# Arguments:
+#   $1: Path to the required file.
 ensure_has_file() {
 	if dry_run; then
 		return $RETOK
@@ -30,11 +50,18 @@ ensure_has_file() {
 	fi
 }
 
+# Checks if a file exists and has read permissions.
+# Arguments:
+#   $1: Path to the file.
 can_read() {
 	ensure_has_file "$1"
 	[[ -r "$1" ]]
 }
 
+# Safely creates one or multiple directories, including parent directories.
+# Respects the dry-run mode (does not create directories if dry-run is active).
+# Arguments:
+#   $@: List of directory paths to create.
 safe_mkdir() {
     for dir in "$@"; do
         if dry_run; then
@@ -45,6 +72,11 @@ safe_mkdir() {
     done
 }
 
+# Iterates through a source directory and creates symbolic links for all its 
+# contents in a destination directory. Skips items that are already linked.
+# Arguments:
+#   $1: Source directory path.
+#   $2: Destination directory path.
 safe_link_all() {
     local src="$1"
     local dst="$2"
@@ -73,6 +105,11 @@ safe_link_all() {
 	fi
 }
 
+# Safely creates a symbolic link. If a file or a different link already exists
+# at the destination, it backs up the existing target before linking.
+# Arguments:
+#   $1: Source file/directory path.
+#   $2: Destination link path.
 safe_link() {
     local src="$1" dst="$2"
 
@@ -92,6 +129,11 @@ safe_link() {
 	fi
 }
 
+# Safely moves files or directories. Creates the target directory structure
+# if it doesn't exist. Backs up the destination file if a collision occurs.
+# Arguments:
+#   $1..$N-1: Source files/directories.
+#   $N: Destination file or directory.
 safe_mv() {
     if [ "$#" -lt 2 ]; then
         warn "safe_mv requires at least two arguments."
@@ -130,6 +172,11 @@ safe_mv() {
     done
 }
 
+# Safely removes files or directories. Includes built-in security checks to 
+# prevent accidental deletion of critical system paths (like '/' or '$HOME').
+# Prompts the user for confirmation before executing the deletion.
+# Arguments:
+#   $@: List of paths to remove.
 safe_rm() {
     local targets=()
 
@@ -167,6 +214,11 @@ safe_rm() {
     fi
 }
 
+# Creates a backup of a file or directory before it gets overwritten.
+# The backup is stored in the global $BACKUP_DIR, preserving the original
+# file's relative path structure starting from $HOME.
+# Arguments:
+#   $1: Path of the file or directory to back up.
 backup_file() {
     local target="$1"
 

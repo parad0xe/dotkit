@@ -19,7 +19,7 @@ TARGET_SHELL_RC=""
 # Constants
 # ------------------------------------------------------------
 readonly PROJECT_ROOT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
-readonly TMP_DIR="$(mktemp -d -t dotfiles.XXXXXX)"
+readonly TMP_DIR="$(mktemp -d -t dotkit.XXXXXX)"
 readonly ASSETS_DIR="$PROJECT_ROOT_DIR/assets"
 readonly LOCAL_BIN_DIR="${HOME}/.local/bin"
 readonly LOCAL_FONT_DIR="${HOME}/.local/share/fonts"

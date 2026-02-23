@@ -64,6 +64,10 @@ has_real_sudo() {
 		return $RETERR
 	fi
 
+	if can_read "$JUNEST_ROOT_DIR/usr/bin_wrappers/sudo"; then
+		return $RETERR
+	fi
+
 	local test_sudo_msg=$(LC_ALL=C sudo -vn 2>&1)
 	is_empty "$test_sudo_msg" || echo "$test_sudo_msg" | grep -q "password is required"
 }

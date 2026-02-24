@@ -54,7 +54,6 @@ ensure_has_file() {
 # Arguments:
 #   $1: Path to the file.
 can_read() {
-	ensure_has_file "$1"
 	[[ -r "$1" ]]
 }
 

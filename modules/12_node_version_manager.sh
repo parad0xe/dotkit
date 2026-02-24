@@ -61,11 +61,12 @@ module_uninstall() {
     fi
 
     if safe_rm "$HOME/.nvm"; then
+		safe_rm "$HOME/.npm"
         uninstalled=true
     else
         muted "Nvm directory not found or already removed."
     fi
-
+	
 	if [[ "$uninstalled" == "true" ]]; then
         blank
         success "Nvm and node versions uninstalled"
@@ -117,6 +118,6 @@ _install_nvm_standard() {
 
 	blank
 	info "Installing node.js lts version..."
-	safe_execute nvm install --lts
+	safe_execute nvm install node
 	success "Nvm and node.js lts installed successfully for $TARGET_SHELL"
 }
